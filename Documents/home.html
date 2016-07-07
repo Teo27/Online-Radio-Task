@@ -1,0 +1,207 @@
+<html>
+<head>
+<title>Home</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<style>
+
+.btnstyle{
+	width: 175px;
+	height: 30px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+td, th {
+    border: 1px solid black;
+}
+table {
+    border-collapse: collapse;
+}
+</style>
+
+<script>
+$(document).ready(function(){
+   setInterval( GetXML, 1000 );
+   
+   function GetXML(){
+	   
+	$.ajax({
+            type: "GET",
+            url: "radio.xml",
+            dataType: "xml",
+            cache: false,
+            success: function(xml) {
+				
+                var title = $(xml).find("title").text();
+				var singer = title.split(" - ")[0];
+				var song = title.split(" - ")[1];
+				
+				var album = $(xml).find("album").text();
+				var genre = $(xml).find("genre").text();
+				var duration = $(xml).find("duration").text();
+				var next = $(xml).find("next").text();
+				
+							
+				if(localStorage.getItem("title") != title){
+					
+					var xmldata = 'singer='+ singer + '&song='+ song + '&album='+ album + '&genre='+ genre + '&duration='+ duration;	
+					AddDB(title, xmldata);
+					
+				}
+
+					$('#singer').html(singer);
+					$('#song').html(song);
+					$('#album').html(album);
+					$('#genre').html(genre);
+					$('#duration').html("/" + duration);
+					
+					Timer(duration,next);
+					
+            }
+        });
+}
+
+	function Timer(duration,next){
+		
+		var durSec = parseInt(duration.split(":")[0])*60 + parseInt(duration.split(":")[1]);
+		var nextSec = parseInt(next.split(":")[0])*60 + parseInt(next.split(":")[1]);
+		
+		var timeInt = durSec - nextSec;
+		
+		var minutes = Math.floor(timeInt / 60);
+		var seconds = timeInt - minutes * 60;
+		
+		var time = String(minutes) + ":" + String(seconds);
+		$('#next').html(time);
+				
+	}
+	
+	
+	function AddDB(title, xmldata){
+		var dataString = xmldata;
+		$.ajax({
+                    type: "POST",
+                    url: "Add.php",
+                    cache: false,
+                    data: dataString,
+                    success: function(){
+					localStorage.setItem("title", title);
+					}
+                  });
+	}
+	
+	$("#MPSong").click(function(){
+        
+		$.ajax({
+                    type: "POST",
+                    url: "MPSong.php",
+                    cache: false,
+                    success: function(response){
+					$("#output").html(response);
+					}
+                  });
+    });
+
+	$("#MPSinger").click(function(){
+			
+			$.ajax({
+						type: "POST",
+						url: "MPSinger.php",
+						cache: false,
+						success: function(response){
+						$("#output").html(response);
+						}
+					  });
+		});	
+		
+		$("#LongSong").click(function(){
+			
+			$.ajax({
+						type: "POST",
+						url: "LongSong.php",
+						cache: false,
+						success: function(response){
+						$("#output").html(response);
+						}
+					  });
+		});	
+		
+		$("#ShortSong").click(function(){
+			
+			$.ajax({
+						type: "POST",
+						url: "ShortSong.php",
+						cache: false,
+						success: function(response){
+						$("#output").html(response);
+						}
+					  });
+		});	
+		
+		$("#MPGenre").click(function(){
+			
+			$.ajax({
+						type: "POST",
+						url: "MPGenre.php",
+						cache: false,
+						success: function(response){
+						$("#output").html(response);
+						}
+					  });
+		});	
+		
+		$("#MostGenre").click(function(){
+			
+			$.ajax({
+						type: "POST",
+						url: "MostGenre.php",
+						cache: false,
+						success: function(response){
+						$("#output").html(response);
+						}
+					  });
+		});	
+});
+
+</script>
+</head>
+<body>
+<div style="margin:0 40% auto">
+<table width=175px border=1 style="text-align:center;white-space:nowrap">
+<tr>
+<td>Singer:</td>
+<td><span  id="singer"></span></td>
+</tr>
+<tr>
+<td>Song:</td>
+<td><span  id="song"></span></td>
+</tr>
+<tr>
+<td>Album:</td>
+<td><span  id="album"></span></td>
+</tr>
+<tr>
+<td>Genre:</td>
+<td><span  id="genre"></span></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align:center;white-space:nowrap;margin-top:5px"><span  id="next"></span><span  id="duration"></span></td>
+</tr>
+</table>
+<br>
+<button type="button" id="MPSinger" class="btnstyle">Most Played Singer</button><br>
+<button type="button" id="MPSong" class="btnstyle">Most Played Song</button><br>
+<button type="button" id="LongSong" class="btnstyle">Longest Song</button><br>
+<button type="button" id="ShortSong" class="btnstyle">Shortest Song</button><br>
+<button type="button" id="MPGenre" class="btnstyle">Most Played Genre</button><br>
+<button type="button" id="MostGenre" class="btnstyle">Genre With Most Songs</button><br>
+<br>
+<span id="output"></span>
+
+<div>
+</body>
+</html>
+
+
+
+
